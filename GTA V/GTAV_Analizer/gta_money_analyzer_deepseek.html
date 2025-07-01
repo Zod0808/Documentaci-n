@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTA V Online - Analizador de Negocios</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .input-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #00ff88;
+        }
+
+        input, select {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .business-selection {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .business-category {
+            margin-bottom: 25px;
+        }
+
+        .business-category h3 {
+            margin-bottom: 15px;
+            color: #00ccff;
+            border-bottom: 2px solid #00ccff;
+            padding-bottom: 5px;
+        }
+
+        .method-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .method-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 20px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+            position: relative;
+        }
+
+        .method-btn.active {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+
+        .method-btn:hover {
+            background: rgba(0, 255, 136, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .method-btn.not-recommended {
+            background: rgba(255, 0, 0, 0.1);
+            border-color: rgba(255, 0, 0, 0.3);
+            color: #ff6b6b;
+        }
+
+        .method-btn.recommended {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: #00ff88;
+        }
+
+        .progress-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            border-radius: 15px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00ff88;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #ccc;
+            font-size: 0.9em;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-wrapper {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .chart-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            color: #00ccff;
+        }
+
+        .recommendations {
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 4px solid #00ff88;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .recommendations h3 {
+            color: #00ccff;
+            margin-bottom: 15px;
+        }
+
+        .cost-info {
+            background: rgba(0, 204, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 3px solid #00ccff;
+        }
+
+        .owned-business {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid #00ff88;
+        }
+
+        .owned-business h4 {
+            color: #00ff88;
+            margin-bottom: 10px;
+        }
+
+        .business-details {
+            display: none;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.8em;
+        }
+
+        .method-btn:hover .business-details {
+            display: block;
+        }
+
+        .difficulty-indicator {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            margin-left: 5px;
+        }
+
+        .difficulty-easy { background: rgba(0, 255, 136, 0.3); }
+        .difficulty-medium { background: rgba(255, 193, 7, 0.3); }
+        .difficulty-hard { background: rgba(255, 87, 87, 0.3); }
+
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 20px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: rgba(0, 204, 255, 0.2);
+            border-color: #00ccff;
+            color: #00ccff;
+        }
+
+        @media (max-width: 768px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><b>🎮 GTA V Online Money Analyzer Pro</b></h1>
+            <p>Análisis completo de golpes y negocios - Planifica tu estrategia perfecta</p>
+        </div>
+
+        <div class="input-section">
+            <div class="input-group">
+                <label for="currentMoney">💰 Dinero Actual (GTA$)</label>
+                <input type="number" id="currentMoney" value="2500000" placeholder="Ej: 2500000" step="1000">
+            </div>
+
+            <div class="input-group">
+                <label for="targetMoney">🎯 Meta de Dinero (GTA$)</label>
+                <input type="number" id="targetMoney" value="8000000" placeholder="Ej: 8000000" step="1000">
+            </div>
+
+            <div class="input-group">
+                <label for="playStyle">🎮 Estilo de juego</label>
+                <select id="playStyle">
+                    <option value="mixed">Mixto (todos los métodos)</option>
+                    <option value="solo">Solo (métodos solitarios)</option>
+                    <option value="team">Equipo (golpes cooperativos)</option>
+                    <option value="passive">Pasivo (negocios AFK)</option>
+                    <option value="active">Activo (golpes y misiones)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="timeAvailable">⏰ Tiempo disponible por sesión</label>
+                <select id="timeAvailable">
+                    <option value="any">Cualquier tiempo</option>
+                    <option value="short">Corto (< 1 hora)</option>
+                    <option value="medium">Medio (1-2 horas)</option>
+                    <option value="long">Largo (2+ horas)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="business-selection">
+            <div class="filter-section">
+                <button class="filter-btn active" data-filter="all">🔍 Todos</button>
+                <button class="filter-btn" data-filter="recommended">⭐ Recomendados</button>
+                <button class="filter-btn" data-filter="owned">✅ Poseídos</button>
+                <button class="filter-btn" data-filter="affordable">💰 Accesibles</button>
+            </div>
+
+            <div class="business-category">
+                <h3>🏦 Golpes (Heists)</h3>
+                <div class="method-selector" data-category="heists">
+                    <button class="method-btn recommended" data-business="Cayo Perico">
+                        Cayo Perico <span class="difficulty-indicator difficulty-medium">Media</span>
+                    </button>
+                    <button class="method-btn recommended" data-business="Casino Diamond">
+                        Casino Diamond <span class="difficulty-indicator difficulty-medium">Media-Alta</span>
+                    </button>
+                    <button class="method-btn" data-business="Pacific Standard">
+                        Pacific Standard <span class="difficulty-indicator difficulty-hard">Alta</span>
+                    </button>
+                    <button class="method-btn" data-business="Humane Labs">
+                        Humane Labs <span class="difficulty-indicator difficulty-medium">Media-Alta</span>
+                    </button>
+                    <button class="method-btn" data-business="Prison Break">
+                        Prison Break <span class="difficulty-indicator difficulty-medium">Media</span>
+                    </button>
+                    <button class="method-btn" data-business="Doomsday">
+                        Doomsday <span class="difficulty-indicator difficulty-hard">Muy Alta</span>
+                    </button>
+                    <button class="method-btn" data-business="Fleeca Bank">
+                        Fleeca Bank <span class="difficulty-indicator difficulty-easy">Fácil</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="business-category">
+                <h3>🏢 Negocios CEO</h3>
+                <div class="method-selector" data-category="ceo">
+                    <button class="method-btn recommended" data-business="Import/Export">
+                        Import/Export <span class="difficulty-indicator difficulty-medium">Media</span>
+                    </button>
+                    <button class="method-btn" data-business="Special Cargo">
+                        Special Cargo <span class="difficulty-indicator difficulty-easy">Fácil</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="business-category">
+                <h3>🏍️ Negocios MC</h3>
+                <div class="method-selector" data-category="mc">
+                    <button class="method-btn recommended" data-business="Cocaine Lockup">
+                        Cocaína <span class="difficulty-indicator difficulty-medium">Media</span>
+                    </button>
+                    <button class="method-btn recommended" data-business="Meth Lab">
+                        Metanfetamina <span class="difficulty-indicator difficulty-medium">Media</span>
+                    </button>
+                    <button class="method-btn" data-business="Weed Farm">
+                        Marihuana <span class="difficulty-indicator difficulty-easy">Fácil</span>
+                    </button>
+                    <button class="method-btn not-recommended" data-business="Counterfeit Cash">
+                        Dinero Falso <span class="difficulty-indicator difficulty-easy">Fácil</span>
+                    </button>
+                    <button class="method-btn not-recommended" data-business="Document Forgery">
+                        Falsificación <span class="difficulty-indicator difficulty-easy">Fácil</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="business-category">
+                <h3>🏭 Otros Negocios</h3>
+                <div class="method-selector" data-category="others">
+                    <button class="method-btn recommended" data-business="Nightclub">
+                        Nightclub <span class="difficulty-indicator difficulty-easy">Pasivo</span>
+                    </button>
+                    <button class="method-btn recommended" data-business="Bunker">
+                        Bunker <span class="difficulty-indicator difficulty-medium">Media</span>
+                    </button>
+                    <button class="method-btn recommended" data-business="Agency">
+                        Agencia <span class="difficulty-indicator difficulty-medium">Media</span>
+                    </button>
+                    <button class="method-btn" data-business="Auto Shop">
+                        Auto Shop <span class="difficulty-indicator difficulty-medium">Media</span>
+                    </button>
+                    <button class="method-btn" data-business="Arcade">
+                        Arcade <span class="difficulty-indicator difficulty-easy">Fácil</span>
+                    </button>
+                    <button class="method-btn not-recommended" data-business="Hangar">
+                        Hangar <span class="difficulty-indicator difficulty-medium">Media</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <h3>📊 Progreso hacia tu meta</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">31%</div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="neededAmount">$5,500,000</div>
+                    <div class="stat-label">Necesitas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="progressPercent">31%</div>
+                    <div class="stat-label">Completado</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="bestMethod">Cayo Perico</div>
+                    <div class="stat-label">Método Recomendado</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="estimatedTime">12h</div>
+                    <div class="stat-label">Tiempo Estimado</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalValue">$15.2M</div>
+                    <div class="stat-label">Valor Negocios</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-wrapper">
+                <h3 class="chart-title">💸 Rentabilidad por Hora</h3>
+                <canvas id="profitChart"></canvas>
+            </div>
+            <div class="chart-wrapper">
+                <h3 class="chart-title">⏱️ Tiempo para alcanzar meta</h3>
+                <canvas id="timeChart"></canvas>
+            </div>
+        </div>
+
+        <div class="recommendations" id="recommendations">
+            <h3>🎯 Recomendaciones Personalizadas</h3>
+            <div id="recommendationText"></div>
+        </div>
+    </div>
+
+    <script>
+        // Datos actualizados de golpes y negocios
+        const businesses = {
+            // Golpes
+            'Fleeca Bank': {
+                profit: 120000,
+                timeHours: 0.75,
+                initialCost: 0, // Costo de preparación es mínimo
+                color: '#560bad',
+                category: 'heists',
+                difficulty: 'easy',
+                description: 'Ganancia neta: ~$120,000. Tiempo: 30-45 min.',
+                players: '2',
+                recommended: false
+            },
+            'Prison Break': {
+                profit: 350000,
+                timeHours: 1.5,
+                initialCost: 40000,
+                color: '#7209b7',
+                category: 'heists',
+                difficulty: 'medium',
+                description: 'Ganancia neta: ~$350,000. Tiempo: 1-2 horas.',
+                players: '4',
+                recommended: false
+            },
+            'Humane Labs': {
+                profit: 450000,
+                timeHours: 1.75,
+                initialCost: 54000,
+                color: '#4cc9f0',
+                category: 'heists',
+                difficulty: 'medium-high',
+                description: 'Ganancia neta: ~$450,000. Tiempo: 1.5-2 horas.',
+                players: '4',
+                recommended: false
+            },
+            'Pacific Standard': {
+                profit: 900000,
+                timeHours: 2.5,
+                initialCost: 100000,
+                color: '#4361ee',
+                category: 'heists',
+                difficulty: 'high',
+                description: 'Ganancia neta: ~$900,000. Tiempo: 2-3 horas.',
+                players: '4',
+                recommended: false
+            },
+            'Doomsday': {
+                profit: 1100000,
+                timeHours: 3.5,
+                initialCost: 1200000, // Costo de la instalación
+                color: '#f72585',
+                category: 'heists',
+                difficulty: 'very-high',
+                description: 'Ganancia neta varía. Tiempo: 3-4 horas.',
+                players: '2-4',
+                recommended: false
+            },
+            'Casino Diamond': {
+                profit: 2100000, // Promedio con Oro
+                timeHours: 2.5,
+                initialCost: 1200000, // Costo del Arcade
+                color: '#f72585',
+                category: 'heists',
+                difficulty: 'medium-high',
+                description: 'Ganancia neta: ~$2.1M (Oro). Tiempo: 2-3 horas.',
+                players: '2-4',
+                recommended: true
+            },
+            'Cayo Perico': {
+                profit: 1500000,
+                timeHours: 1,
+                initialCost: 2200000, // Costo del Kosatka
+                color: '#9d4edd',
+                category: 'heists',
+                difficulty: 'medium',
+                description: 'Ganancia neta (solitario): ~$1.5M. Tiempo: 1 hora.',
+                players: '1-4',
+                recommended: true
+            },
+
+            // CEO Businesses
+            'Import/Export': {
+                profit: 240000, // Ganancia por hora vendiendo 3 autos
+                timeHours: 1,
+                initialCost: 2500000, // Oficina + Garaje
+                color: '#43aa8b',
+                category: 'ceo',
+                difficulty: 'medium',
+                description: 'Vender solo gama alta. $80K por auto.',
+                players: '1',
+                recommended: true
+            },
+            'Special Cargo': {
+                profit: 2220000, // Venta de almacén grande
+                timeHours: 11,
+                initialCost: 2900000, // Oficina + Almacén grande
+                color: '#277da1',
+                category: 'ceo',
+                difficulty: 'easy',
+                description: 'Llenar almacén grande toma 10-12 horas.',
+                players: '1',
+                recommended: false
+            },
+
+            // MC Businesses (con mejoras)
+            'Cocaine Lockup': {
+                profit: 420000,
+                timeHours: 5,
+                initialCost: 2775000, // Negocio + mejoras
+                color: '#f8961e',
+                category: 'mc',
+                difficulty: 'medium',
+                description: 'Mejor negocio MC. Ganancia con mejoras.',
+                players: '1-4',
+                recommended: true
+            },
+            'Meth Lab': {
+                profit: 357000,
+                timeHours: 6,
+                initialCost: 2185000, // Negocio + mejoras
+                color: '#90e0ef',
+                category: 'mc',
+                difficulty: 'medium',
+                description: 'Segundo mejor MC. Ganancia con mejoras.',
+                players: '1-4',
+                recommended: true
+            },
+            'Weed Farm': {
+                profit: 252000,
+                timeHours: 6,
+                initialCost: 1857000, // Negocio + mejoras
+                color: '#52b788',
+                category: 'mc',
+                difficulty: 'easy',
+                description: 'Decente con mejoras.',
+                players: '1-4',
+                recommended: false
+            },
+            'Counterfeit Cash': {
+                profit: 196000,
+                timeHours: 5,
+                initialCost: 1605000, // Negocio + mejoras
+                color: '#ffd60a',
+                category: 'mc',
+                difficulty: 'easy',
+                description: 'No recomendado, baja ganancia.',
+                players: '1-4',
+                recommended: false
+            },
+            'Document Forgery': {
+                profit: 168000,
+                timeHours: 5,
+                initialCost: 1285000, // Negocio + mejoras
+                color: '#003566',
+                category: 'mc',
+                difficulty: 'easy',
+                description: 'Peor negocio MC, evitar.',
+                players: '1-4',
+                recommended: false
+            },
+
+            // Other Businesses
+            'Bunker': {
+                profit: 210000,
+                timeHours: 2.33,
+                initialCost: 2865000, // Bunker + mejoras
+                color: '#06ffa5',
+                category: 'others',
+                difficulty: 'medium',
+                description: 'Buena ganancia pasiva con mejoras.',
+                players: '1-4',
+                recommended: true
+            },
+            'Hangar': {
+                profit: 850000, // Venta de 50 unidades
+                timeHours: 10,
+                initialCost: 1200000,
+                color: '#219ebc',
+                category: 'others',
+                difficulty: 'medium',
+                description: 'Muy lento, solo con bonificaciones.',
+                players: '1-4',
+                recommended: false
+            },
+            'Nightclub': {
+                profit: 1600000, // Venta de almacén lleno
+                timeHours: 66,
+                initialCost: 2500000, // Club + almacén + técnicos
+                color: '#e63946',
+                category: 'others',
+                difficulty: 'passive',
+                description: 'Excelente pasivo si tienes otros negocios.',
+                players: '1',
+                recommended: true
+            },
+            'Arcade': {
+                profit: 5000, // Ingreso pasivo diario
+                timeHours: 24,
+                initialCost: 1200000,
+                color: '#8ecae6',
+                category: 'others',
+                difficulty: 'easy',
+                description: 'Requerido para el Golpe al Casino.',
+                players: '1',
+                recommended: false
+            },
+            'Agency': {
+                profit: 1000000, // Final de Dr. Dre
+                timeHours: 2,
+                initialCost: 2010000,
+                color: '#fb8500',
+                category: 'others',
+                difficulty: 'medium',
+                description: '$1M por misión de Dr. Dre (2h).',
+                players: '1',
+                recommended: true
+            },
+            'Auto Shop': {
+                profit: 235000, // Promedio por contrato
+                timeHours: 1.5,
+                initialCost: 1700000,
+                color: '#ffb3c6',
+                category: 'others',
+                difficulty: 'medium',
+                description: 'Contratos rápidos, ganancia media.',
+                players: '1-4',
+                recommended: false
+            }
+        };
+
+        let ownedBusinesses = [];
+        let profitChart, timeChart;
+
+        // Función para filtrar botones
+        function filterBusinesses(filterType) {
+            const current = parseInt(document.getElementById('currentMoney').value) || 0;
+            
+            document.querySelectorAll('.method-btn').forEach(btn => {
+                const businessName = btn.getAttribute('data-business');
+                const business = businesses[businessName];
+                let show = true;
+
+                switch(filterType) {
+                    case 'recommended':
+                        show = business.recommended;
+                        break;
+                    case 'owned':
+                        show = ownedBusinesses.includes(businessName);
+                        break;
+                    case 'affordable':
+                        show = current >= business.initialCost || ownedBusinesses.includes(businessName);
+                        break;
+                    case 'all':
+                    default:
+                        show = true;
+                }
+
+                btn.style.display = show ? 'inline-block' : 'none';
+            });
+        }
+
+        // Event listeners para filtros
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                filterBusinesses(this.getAttribute('data-filter'));
+            });
+        });
+
+        // Función para actualizar negocios poseídos
+        function updateOwnedBusinesses() {
+            ownedBusinesses = Array.from(document.querySelectorAll('.method-btn.active'))
+                .map(btn => btn.getAttribute('data-business'));
+            updateCalculations();
+        }
+
+        // Event listeners para los botones de negocios
+        document.querySelectorAll('.method-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.classList.toggle('active');
+                updateOwnedBusinesses();
+            });
+        });
+
+        function formatMoney(amount) {
+            return new Intl.NumberFormat('es-ES', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount).replace('US$', '$');
+        }
+
+        function updateCalculations() {
+            const current = parseInt(document.getElementById('currentMoney').value) || 0;
+            const target = parseInt(document.getElementById('targetMoney').value) || 0;
+            const needed = target - current;
+            const progress = Math.min((current / target) * 100, 100);
+
+            // Actualizar progreso visual
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressFill').textContent = Math.round(progress) + '%';
+            
+            // Actualizar estadísticas
+            document.getElementById('neededAmount').textContent = formatMoney(Math.max(needed, 0));
+            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+
+            // Calcular valor total de negocios poseídos
+            const totalValue = ownedBusinesses.reduce((sum, business) => {
+                return sum + (businesses[business]?.initialCost || 0);
+            }, 0);
+            document.getElementById('totalValue').textContent = formatMoney(totalValue);
+
+            // Encontrar mejor método
+            const playStyle = document.getElementById('playStyle').value;
+            const timeAvailable = document.getElementById('timeAvailable').value;
+            
+            let bestMethod = findBestMethod(current, needed, playStyle, timeAvailable);
+            
+            document.getElementById('bestMethod').textContent = bestMethod?.name || 'Ahorra más';
+            
+            if (bestMethod) {
+                const estimatedHours = needed / (bestMethod.profit / bestMethod.timeHours);
+                document.getElementById('estimatedTime').textContent = estimatedHours > 0 ? estimatedHours.toFixed(1) + 'h' : 'N/A';
+            } else {
+                document.getElementById('estimatedTime').textContent = 'N/A';
+            }
+
+            updateCharts(playStyle, timeAvailable);
+            updateRecommendations(bestMethod);
+        }
+
+        function findBestMethod(current, needed, playStyle, timeAvailable) {
+            let bestMethod = null;
+            let maxProfitRate = 0;
+
+            for (const name in businesses) {
+                const business = businesses[name];
+                
+                // Filtro de estilo de juego
+                let styleMatch = false;
+                switch(playStyle) {
+                    case 'solo':
+                        styleMatch = business.players.includes('1');
+                        break;
+                    case 'team':
+                        styleMatch = !business.players.includes('1') || business.players.includes('4');
+                        break;
+                    case 'passive':
+                        styleMatch = business.difficulty === 'passive';
+                        break;
+                    case 'active':
+                        styleMatch = business.category === 'heists' || business.category === 'ceo';
+                        break;
+                    default: // mixed
+                        styleMatch = true;
+                }
+                if (!styleMatch) continue;
+
+                // Filtro de tiempo disponible
+                let timeMatch = false;
+                switch(timeAvailable) {
+                    case 'short':
+                        timeMatch = business.timeHours <= 1;
+                        break;
+                    case 'medium':
+                        timeMatch = business.timeHours > 1 && business.timeHours <= 2;
+                        break;
+                    case 'long':
+                        timeMatch = business.timeHours > 2;
+                        break;
+                    default: // any
+                        timeMatch = true;
+                }
+                if (!timeMatch) continue;
+
+                // Considerar solo si se posee o es accesible
+                if (ownedBusinesses.includes(name) || current >= business.initialCost) {
+                    const profitRate = business.profit / business.timeHours;
+                    if (profitRate > maxProfitRate) {
+                        maxProfitRate = profitRate;
+                        bestMethod = { name, ...business };
+                    }
+                }
+            }
+            return bestMethod;
+        }
+
+        function updateCharts(playStyle, timeAvailable) {
+            const filteredData = Object.entries(businesses).filter(([name, business]) => {
+                let styleMatch = true;
+                if (playStyle !== 'mixed') {
+                     switch(playStyle) {
+                        case 'solo': styleMatch = business.players.includes('1'); break;
+                        case 'team': styleMatch = !business.players.includes('1') || business.players.includes('4'); break;
+                        case 'passive': styleMatch = business.difficulty === 'passive'; break;
+                        case 'active': styleMatch = business.category === 'heists' || business.category === 'ceo'; break;
+                        default: styleMatch = true;
+                    }
+                }
+                
+                let timeMatch = true;
+                if (timeAvailable !== 'any') {
+                    switch(timeAvailable) {
+                        case 'short': timeMatch = business.timeHours <= 1; break;
+                        case 'medium': timeMatch = business.timeHours > 1 && business.timeHours <= 2; break;
+                        case 'long': timeMatch = business.timeHours > 2; break;
+                        default: timeMatch = true;
+                    }
+                }
+                return styleMatch && timeMatch;
+            });
+
+            const labels = filteredData.map(([name]) => name);
+            const profitRates = filteredData.map(([name, business]) => business.profit / business.timeHours);
+            const colors = filteredData.map(([name, business]) => business.color);
+            const needed = (document.getElementById('targetMoney').value || 0) - (document.getElementById('currentMoney').value || 0);
+            const timeToTargetData = filteredData.map(([name, business]) => {
+                const rate = business.profit / business.timeHours;
+                const hours = rate > 0 ? needed / rate : 0;
+                return { name, hours };
+            }).filter(item => item.hours <= 1000 && item.hours > 0);
+
+            const timeLabels = timeToTargetData.map(item => item.name);
+            const timeToTarget = timeToTargetData.map(item => item.hours);
+            const timeColors = timeToTargetData.map(item => businesses[item.name].color);
+
+            if (profitChart) profitChart.destroy();
+            profitChart = new Chart(document.getElementById('profitChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Rentabilidad por Hora (GTA$)',
+                        data: profitRates,
+                        backgroundColor: colors,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { ticks: { color: '#fff' } },
+                        x: { ticks: { color: '#fff' } }
+                    }
+                }
+            });
+
+            if (timeChart) timeChart.destroy();
+            timeChart = new Chart(document.getElementById('timeChart'), {
+                type: 'bar',
+                data: {
+                    labels: timeLabels,
+                    datasets: [{
+                        label: 'Horas para alcanzar la meta',
+                        data: timeToTarget,
+                        backgroundColor: timeColors,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { ticks: { color: '#fff' } },
+                        x: { ticks: { color: '#fff' } }
+                    }
+                }
+            });
+        }
+
+        function updateRecommendations(bestMethod) {
+            const recommendationText = document.getElementById('recommendationText');
+            if (bestMethod) {
+                let html = `<p>Para tu estilo de juego y tiempo, el método más eficiente es <strong style="color:${bestMethod.color}">${bestMethod.name}</strong>.</p>`;
+                html += `<p>Genera aproximadamente <strong>${formatMoney(bestMethod.profit / bestMethod.timeHours)} por hora</strong>.</p>`;
+                
+                if (!ownedBusinesses.includes(bestMethod.name)) {
+                    html += `<div class="cost-info">Necesitarás una inversión inicial de <strong>${formatMoney(bestMethod.initialCost)}</strong> para empezar.</div>`;
+                }
+
+                html += `<h4>Recomendaciones Finales:</h4>`;
+                html += `<ul>`;
+                html += `<li><strong>Solitario:</strong> Cayo Perico + Nightclub + Bunker</li>`;
+                html += `<li><strong>Equipo:</strong> Casino Heist + Bunker + Cocaína</li>`;
+                html += `<li><strong>Evitar:</strong> Hangar, Falsificación, Dinero Falso</li>`;
+                html += `</ul>`;
+
+                recommendationText.innerHTML = html;
+            } else {
+                recommendationText.innerHTML = '<p>No se encontraron métodos adecuados. Intenta ajustar tus filtros o ahorra para una inversión inicial.</p>';
+            }
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input, select').forEach(el => {
+                el.addEventListener('change', updateCalculations);
+            });
+            
+            updateOwnedBusinesses();
+            filterBusinesses('all');
+        });
+    </script>
+</body>
+</html>
