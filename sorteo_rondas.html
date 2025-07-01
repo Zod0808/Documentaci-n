@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteo de Nombres por Rondas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #4facfe;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-top: 4px solid #4facfe;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4facfe;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .round-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border-top: 5px solid #4facfe;
+        }
+
+        .round-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .round-header h3 {
+            font-size: 1.3em;
+            margin-bottom: 5px;
+        }
+
+        .round-list {
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .name-item {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border-left: 3px solid #4facfe;
+            transition: all 0.3s ease;
+        }
+
+        .name-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .name-number {
+            font-weight: bold;
+            color: #4facfe;
+            margin-right: 10px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .results {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎲 Sorteo por Rondas</h1>
+            <p>Sortea nombres de 10 en 10 sin repeticiones entre rondas</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>📝 Cargar Nombres</h2>
+                <div class="input-group">
+                    <label for="nombresInput">Ingresa los nombres (uno por línea):</label>
+                    <textarea id="nombresInput" placeholder="Juan Pérez&#10;María González&#10;Carlos López&#10;..."></textarea>
+                </div>
+                <button class="btn" onclick="cargarNombres()">📋 Cargar Nombres</button>
+                <button class="btn btn-success" onclick="generarNombresEjemplo()">✨ Cargar Ejemplo</button>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalNombres">0</div>
+                    <div class="stat-label">Total de Nombres</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="nombresDisponibles">0</div>
+                    <div class="stat-label">Disponibles</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="rondaActual">0</div>
+                    <div class="stat-label">Ronda Actual</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="nombresSorteados">0</div>
+                    <div class="stat-label">Ya Sorteados</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Realizar Sorteo</h2>
+                <button class="btn btn-success" onclick="realizarSorteo()">🎲 Sortear 10 Nombres</button>
+                <button class="btn btn-danger" onclick="reiniciarSorteo()">🔄 Reiniciar Todo</button>
+            </div>
+
+            <div class="results" id="resultados">
+                <!-- Los resultados aparecerán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let todosLosNombres = [];
+        let nombresDisponibles = [];
+        let rondas = [];
+        let rondaActual = 0;
+
+        function cargarNombres() {
+            const textarea = document.getElementById('nombresInput');
+            const nombres = textarea.value.trim().split('\n').filter(nombre => nombre.trim() !== '');
+            
+            if (nombres.length === 0) {
+                alert('⚠️ Por favor ingresa al menos un nombre');
+                return;
+            }
+
+            todosLosNombres = nombres.map(nombre => nombre.trim());
+            nombresDisponibles = [...todosLosNombres];
+            rondas = [];
+            rondaActual = 0;
+            
+            actualizarEstadisticas();
+            mostrarResultados();
+            
+            mostrarAlerta(`✅ Se cargaron ${todosLosNombres.length} nombres correctamente`, 'success');
+        }
+
+        function generarNombresEjemplo() {
+            const ejemplos = [
+                'Ana García', 'Luis Martínez', 'Carmen López', 'Diego Ruiz', 'Elena Vargas',
+                'Fernando Castro', 'Gabriela Moreno', 'Héctor Silva', 'Isabel Ramos', 'Javier Herrera',
+                'Karen Jiménez', 'Leonardo Vega', 'Mónica Torres', 'Nicolás Flores', 'Olivia Mendoza',
+                'Pablo Guerrero', 'Quintana Rosa', 'Roberto Peña', 'Sofía Aguilar', 'Tomás Navarro',
+                'Úrsula Cortés', 'Víctor Delgado', 'Wendy Espinoza', 'Xavier Rojas', 'Yolanda Sánchez',
+                'Zacarías Ortega', 'Adriana Cruz', 'Bernardo Ríos', 'Claudia Medina', 'Daniel Paredes',
+                'Estela Campos', 'Francisco Reyes', 'Gloria Téllez', 'Ignacio Fuentes', 'Jacinta Molina',
+                'Kevin Pacheco', 'Leticia Villanueva', 'Manuel Cabrera', 'Nora Estrada', 'Octavio Lara',
+                'Patricia Ibarra', 'Quintero Alba', 'Raúl Domínguez', 'Sandra Cervantes', 'Teodoro Valdés'
+            ];
+            
+            document.getElementById('nombresInput').value = ejemplos.join('\n');
+            cargarNombres();
+        }
+
+        function realizarSorteo() {
+            if (nombresDisponibles.length === 0) {
+                mostrarAlerta('⚠️ No hay nombres disponibles para sortear', 'warning');
+                return;
+            }
+
+            const cantidadASortear = Math.min(10, nombresDisponibles.length);
+            const sorteados = [];
+            
+            // Crear una copia del array para no modificar el original durante el sorteo
+            const disponibles = [...nombresDisponibles];
+            
+            for (let i = 0; i < cantidadASortear; i++) {
+                const indiceAleatorio = Math.floor(Math.random() * disponibles.length);
+                const nombreSorteado = disponibles.splice(indiceAleatorio, 1)[0];
+                sorteados.push(nombreSorteado);
+            }
+            
+            // Actualizar el array de nombres disponibles
+            nombresDisponibles = disponibles;
+            
+            rondaActual++;
+            rondas.push({
+                numero: rondaActual,
+                nombres: sorteados
+            });
+            
+            actualizarEstadisticas();
+            mostrarResultados();
+            
+            mostrarAlerta(`🎉 ¡Ronda ${rondaActual} completada! Se sortearon ${sorteados.length} nombres`, 'success');
+        }
+
+        function reiniciarSorteo() {
+            if (confirm('¿Estás seguro de que quieres reiniciar todo el sorteo?')) {
+                nombresDisponibles = [...todosLosNombres];
+                rondas = [];
+                rondaActual = 0;
+                
+                actualizarEstadisticas();
+                mostrarResultados();
+                
+                mostrarAlerta('🔄 Sorteo reiniciado correctamente', 'info');
+            }
+        }
+
+        function actualizarEstadisticas() {
+            document.getElementById('totalNombres').textContent = todosLosNombres.length;
+            document.getElementById('nombresDisponibles').textContent = nombresDisponibles.length;
+            document.getElementById('rondaActual').textContent = rondaActual;
+            document.getElementById('nombresSorteados').textContent = todosLosNombres.length - nombresDisponibles.length;
+        }
+
+        function mostrarResultados() {
+            const contenedor = document.getElementById('resultados');
+            
+            if (rondas.length === 0) {
+                contenedor.innerHTML = '<div class="alert alert-info">🎲 Los resultados del sorteo aparecerán aquí</div>';
+                return;
+            }
+            
+            let html = '';
+            rondas.forEach(ronda => {
+                html += `
+                    <div class="round-card">
+                        <div class="round-header">
+                            <h3>Ronda ${ronda.numero}</h3>
+                            <small>${ronda.nombres.length} nombres sorteados</small>
+                        </div>
+                        <div class="round-list">
+                            ${ronda.nombres.map((nombre, index) => `
+                                <div class="name-item">
+                                    <span class="name-number">${index + 1}.</span>
+                                    ${nombre}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            contenedor.innerHTML = html;
+        }
+
+        function mostrarAlerta(mensaje, tipo) {
+            const alertas = document.querySelectorAll('.alert');
+            alertas.forEach(alerta => alerta.remove());
+            
+            const alerta = document.createElement('div');
+            alerta.className = `alert alert-${tipo}`;
+            alerta.textContent = mensaje;
+            
+            const seccionSorteo = document.querySelector('.section:last-of-type');
+            seccionSorteo.insertBefore(alerta, seccionSorteo.firstChild);
+            
+            setTimeout(() => {
+                alerta.remove();
+            }, 5000);
+        }
+
+        // Inicializar estadísticas al cargar la página
+        actualizarEstadisticas();
+        mostrarResultados();
+    </script>
+</body>
+</html>
